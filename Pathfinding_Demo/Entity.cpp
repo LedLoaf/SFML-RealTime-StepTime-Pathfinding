@@ -62,12 +62,6 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 	Tile* startNode = level.getTile(getPosition());
 	Tile* goalNode = level.getTile(targetPosition);
 
-	/* show color for the start and goal nodes (not needed) */
-	if (showStartColor)
-		startNode->sprite.setColor(sf::Color::Green);
-	if (showGoalColor)
-		goalNode->sprite.setColor(sf::Color::Red);
-
 	// check we have a valid path to find. If not we can just end the function as there's no path to find.
 	if (startNode == goalNode) {
 		// Clear the vector of target positions.
@@ -250,6 +244,12 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 
 	// reverse the target position as we read them from goal to origin and we need them the other way around.
 	std::reverse(m_targetPositionsRealTime.begin(), m_targetPositionsRealTime.end());
+	
+	/* show color for the start and goal nodes (not needed) */
+	if (showStartColor)
+		startNode->sprite.setColor(sf::Color::Green);
+	if (showGoalColor)
+		goalNode->sprite.setColor(sf::Color::Red);
 }
 
 void Entity::updateByStepTime(Level& level) {
