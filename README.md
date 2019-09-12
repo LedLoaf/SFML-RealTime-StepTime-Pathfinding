@@ -15,8 +15,8 @@ Use numbers 0-9 to toggle various colors on and off to change the visual indicat
 6 to toggle starting tile colors
 7 to togggle goal tile colors
 8 to toggle tiles not checked colors
-9 reset all colors off
-0 reset all colors on
+9 reset all colors OFF
+0 reset all colors ON
 R to toggle to Real-Time or Step-Time pathfinding
 
 The most important things to look at for the pathfinding algorithm itself are:
