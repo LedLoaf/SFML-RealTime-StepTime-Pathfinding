@@ -4,10 +4,11 @@
 #include <iostream>
 
 /* NOTE ALL THE BOOLS ARE STRICTLY FOR VISUALS */
-Entity::Entity()
-: m_speed{200}, m_allowDiagonals{false}
-,showStartColor{true},showGoalColor{true},showCurrentPathColor{true}
-,showPathColor{true},showFCostColor{true},showOpenListColor{true},showTilesNotCheckedColor{false}{
+Entity::Entity() : 
+					m_speed{200}, allowDiagonals{false}, isRealTimeMode{false}
+				   ,showStartColor{true},showGoalColor{true},showCurrentPathColor{true}
+				   ,showPathColor{true},showFCostColor{true},showOpenListColor{true},showTilesNotCheckedColor{false}
+{
 	m_sprite.setSize({32, 32});
 	m_sprite.setFillColor(sf::Color::Green);
 	m_startNode = nullptr;
@@ -24,18 +25,16 @@ void Entity::setPosition(sf::Vector2f pos) {
 
 void Entity::handleInput() {
 	// allows 8 directions of pathfinding, instead of 4
-	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
-		m_allowDiagonals = !m_allowDiagonals;
-
-		if (m_allowDiagonals)
-			std::cout << "allowDiagonals Enabled\n";
-		else
-			std::cout << "allowDiagonals Disabled\n";
-	}
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
+		allowDiagonals = !allowDiagonals;
 }
 
-void Entity::update(float timeDelta) {
-	// no basic logic, could put a switch here for what type of pathfinding to run.
+void Entity::update(Level& level, float dt) {
+	
+	if (isRealTimeMode)
+		updateByRealTime(level, dt);
+	else
+		updateByStepTime(level);
 }
 
 void Entity::draw(sf::RenderWindow* window) {
@@ -78,13 +77,13 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 			Tile* node = level.getTile(i, j);
 			if (node == nullptr)
 				continue;
-			heightOffset = abs(node->rowIndex - goalNode->rowIndex);
-			rowOffset = abs(node->columnIndex - goalNode->columnIndex);
+			heightOffset = abs(node->sprite.getPosition().y/TILE_SIZE - goalNode->sprite.getPosition().y / TILE_SIZE);
+			rowOffset = abs(node->sprite.getPosition().x / TILE_SIZE - goalNode->sprite.getPosition().x / TILE_SIZE);
 
 			node->H = heightOffset + rowOffset;
 
 			/* not needed and color for visuals */
-			if(showTilesNotCheckedColor)
+			if(showTilesNotCheckedColor && !isAllOff())
 				node->sprite.setColor(sf::Color::Blue);
 		}
 	}
@@ -118,6 +117,8 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 		std::vector<Tile*> adjacentTiles;
 		Tile* node;
 
+		/* NOTE columnIndex and rowIndex are just easier ways to access the indexes. it is the same thing as currentNode->sprite->getPosition() / TILE_SIZE */
+
 		// top.
 		node = level.getTile(currentNode->columnIndex, currentNode->rowIndex - 1);
 		if ((node != nullptr) && (level.isFloor(*node))) {
@@ -142,7 +143,8 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 			adjacentTiles.push_back(level.getTile(currentNode->columnIndex - 1, currentNode->rowIndex));
 		}
 
-		if(m_allowDiagonals)
+		/* checks additional 4 directions for 8 directions in total (aka diagonals)*/
+		if(allowDiagonals)
 		{
 			// north-west.
 			node = level.getTile(currentNode->columnIndex-1, currentNode->rowIndex - 1);
@@ -244,12 +246,13 @@ void Entity::updatePathfinding(Level& level, sf::Vector2f targetPosition)
 
 	// reverse the target position as we read them from goal to origin and we need them the other way around.
 	std::reverse(m_targetPositionsRealTime.begin(), m_targetPositionsRealTime.end());
-	
+
 	/* show color for the start and goal nodes (not needed) */
 	if (showStartColor)
 		startNode->sprite.setColor(sf::Color::Green);
 	if (showGoalColor)
 		goalNode->sprite.setColor(sf::Color::Red);
+
 }
 
 void Entity::updateByStepTime(Level& level) {
@@ -305,28 +308,41 @@ void Entity::updateByRealTime(Level& level, float dt)
 }
 
 /* strictly for visuals */
-void Entity::turnOnAllColors() {
-	/* variables to show colors */
-	showStartColor = true;
-	showGoalColor = true;
-	showOpenListColor = true;
-	showCurrentPathColor = true;
-	showPathColor = true;
-	showFCostColor = true;
-}
+void Entity::setAllColorsStatus(bool status) {
+	showStartColor = status;
+	showGoalColor = status;
+	showOpenListColor = status;
+	showCurrentPathColor = status;
+	showPathColor = status;
+	showFCostColor = status;
 
+	if (!status)
+		showTilesNotCheckedColor = false;
+}
 /* strictly for visuals */
-void Entity::turnOffAllColors(){
-/* variables to show colors */
- showStartColor = false;
- showGoalColor = false;
- showOpenListColor = false;
- showCurrentPathColor = false;
- showPathColor = false;
- showFCostColor = false;
- showTilesNotCheckedColor = false;
-}
-
 void Entity::toggleTilesNotCheckedColors() {
 	showTilesNotCheckedColor = !showTilesNotCheckedColor;
+}
+/* strictly for setting start node color */
+Tile* Entity::getStartNode() const
+{
+	if (m_startNode)
+		return m_startNode;
+}
+
+/* strictly for setting end node color */
+Tile* Entity::getGoalNode() const
+{
+	if (m_goalNode )
+		 return m_goalNode;
+}
+/* if all colors are off */
+bool Entity::isAllOff() const
+{
+	return 		   !showStartColor
+				&& !showGoalColor 
+				&& !showOpenListColor 
+				&& !showCurrentPathColor 
+				&& !showPathColor
+				&& !showFCostColor;
 }
