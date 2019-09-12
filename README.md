@@ -29,6 +29,6 @@ And lastly, the Tile struct in Level.cpp.
 Everything else is just for color visuals, and the ability to see tiles on a map. 
 If I took out the visuals the program would be extremely small, with just the above functions needed.
 
-One thing to point out is the rowsIndex and colsIndex in the Tile struct are just easier access to what is basically this->sprite.getPosition / TILE_SIZE. You can simply do that as well for checking the nodes.
+One thing to point out is the rowsIndex and colsIndex in the Tile struct are just easier access to what is basically this->sprite.getPosition / TILE_SIZE. You can simply do that as well for checking the nodes. It is just a way to grab the tile index quickly.
 
 Thanks, hope this helps someone. I'm not a great teacher, but I did learn how to do A* like this. 
