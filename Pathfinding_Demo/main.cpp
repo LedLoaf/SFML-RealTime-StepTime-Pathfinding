@@ -110,7 +110,7 @@ int main() {
 				if (m_playerPreviousTile != playerCurrentTile) {
 					m_playerPreviousTile = playerCurrentTile;
 
-					enemy.updatePathfinding(level, playerCurrentTile->sprite.getPosition());
+					player.updatePathfinding(level, playerCurrentTile->sprite.getPosition());
 
 				}
 			}
